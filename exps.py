@@ -12,9 +12,6 @@ import mmd
 archive_path = 'data/samples/'
 
 test_datasets = [
-    lambda: datasets.keystroke_ds(seed=0),
-    lambda: datasets.wiki_1Dcomb(seed=0),
-    lambda: datasets.livej_ds(seed=0,tr_sz=50000),
     lambda: datasets.dual_cauchy_ds(test=True, seed=0)
 ]
 
@@ -24,7 +21,7 @@ def exp(dsind, alg='pareto', device="cpu"):
     in_size = 2
 
     h_size = 32
-    iters = 20_000
+    iters = 1 # 20_000
 
     assert dsind<len(test_datasets), "dataset index must be less than " + str(len(test_datasets))
     ds = test_datasets[dsind]()

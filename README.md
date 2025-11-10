@@ -8,8 +8,8 @@ Note: we recommend installing torch with GPU support
 
 ## Run an experiment
 ```
-python exps.py -ds 3 -type pareto
-python exps.py -ds 3 -type normal
+python exps.py -ds 0 -type pareto
+python exps.py -ds 0 -type normal
 ```
 
 ## Options
