@@ -10,12 +10,13 @@ This repo investigates whether a simpler approach can achieve similar results. S
 
 <img src="figs/normal_tailhist.png" width="200" /><img src="figs/pareto_tailhist.png" width="200" /><img src="figs/cauchy2gaussian_tailhist.png" width="200" /><figcaption>**Histograms left to right**: `normal`, `pareto`, `cauchy2gaussian`</figcaption>
 
+Result metrics are shown in the table below. The KS statistic measures the maximum distance between the empirical cumulative distribution functions of the generated and real data. Lower is better. The area function computes the area between the log-log complementary cumulative distribution functions (CCDFs). This metric is particularly sensitive to tail behavior in heavy-tailed distributions. Lower is better.
 
 | Experiment     | KS Statistic | Log-Log Area |
 |----------------|--------------|---------------|
 | `normal`         | 0.0332       | 52.35         |
 | `pareto`         | 0.0123       | 1.97          |
-| `cauchy2gaussian`| 0.00637      | 20.50         |
+| `cauchy2gaussian`| 0.0059      | 2.07         |
 
 Even though the training data is a mixture of Cauchy distributions, we find that fitting another Cauchy distribution to the mixture provides adequate results. This indicates that the method may still be suitable for data composed of a mixture of unknown heavy-tailed distributions, provided the fitted distribution provides a reasonably good approximation. 
 
