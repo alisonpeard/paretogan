@@ -143,6 +143,7 @@ def evaluate(model, noise_fn, lossfn, ds, output_transform=None, expname='', dev
 
     loglogplot(real, fake)
     histplot(real, fake)
+    histtailplot(real, fake)
 
     return ks, area_dist
 
@@ -213,7 +214,22 @@ def histplot(real, fake):
     plt.xlabel('x (normalized)')
     plt.ylabel('P(x)')
     plt.legend(['Real','Generated'], loc='upper right')
-    # plt.legend(['Generated', 'Real'], loc='upper right')
+
+    plt.show()
+
+def histtailplot(real, fake):
+    real.sort()
+    bins = np.linspace(-200, 200, 200)
+
+    plt.figure()
+    plt.hist(fake, bins=bins, density=True)
+    n, x = np.histogram(real, bins=bins, density=True)
+    x = (bins[1:]+bins[:-1])/2
+    plt.plot(x, n, linewidth=3)
+    plt.xlabel('x (normalized)')
+    plt.ylabel('P(x)')
+    plt.legend(['Real','Generated'], loc='upper right')
+    plt.yscale('log')
 
     plt.show()
 
