@@ -18,13 +18,13 @@ test_datasets = [
     lambda: datasets.dual_cauchy_ds(test=True, seed=0)
 ]
 
-def exp(dsind, alg='pareto'):
+def exp(dsind, alg='pareto', device="cpu"):
 
     lr = 0.001
     in_size = 2
 
     h_size = 32
-    iters = 20000
+    iters = 20_000
 
     assert dsind<len(test_datasets), "dataset index must be less than " + str(len(test_datasets))
     ds = test_datasets[dsind]()
@@ -42,7 +42,7 @@ def exp(dsind, alg='pareto'):
 
         gamma = 2
         loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
-        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr)
+        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr, device=device)
 
     elif alg == 'uniform':
         model = models.Generator(in_size, h_size, 1)
@@ -50,7 +50,7 @@ def exp(dsind, alg='pareto'):
 
         gamma = 1
         loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
-        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr)
+        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr, device=device)
 
     elif alg == 'normal':
         model = models.Generator(in_size, h_size, 1)
@@ -58,7 +58,7 @@ def exp(dsind, alg='pareto'):
 
         gamma = 1
         loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
-        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr)
+        ks, area_dist = run_exp(ds, model, noise_fn, loss_fn, iters=iters, lr=lr, device=device)
 
     elif alg == 'lognormal':
 
@@ -72,14 +72,14 @@ def exp(dsind, alg='pareto'):
         gamma = 1
         loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
         ks, area_dist = run_exp(ln_ds, model, noise_fn, loss_fn, iters=iters, lr=lr,
-                       output_transform=utils.loguntransform)
+                       output_transform=utils.loguntransform, device=device)
     else:
         raise ValueError("alg must be one of 'pareto','uniform','normal','lognormal'")
 
     return ks, area_dist
 
 
-def run_exp(dataset, model, noise_fn, loss_fn, lr=1e-4, iters=10000, output_transform=None, expname=''):
+def run_exp(dataset, model, noise_fn, loss_fn, lr=1e-4, iters=10000, output_transform=None, expname='', device="cpu"):
     train_ds = dataset[0]
     val_ds = dataset[1]
     test_ds = dataset[2]
@@ -87,12 +87,12 @@ def run_exp(dataset, model, noise_fn, loss_fn, lr=1e-4, iters=10000, output_tran
     utils.train(model, noise_fn, loss_fn, train_ds, val_ds, iters=iters, lr=lr)
 
     # vdist = evaluate(model, noise_fn, loss_fn, val_ds, output_transform=output_transform,expname=expname)
-    ks, area_dist = evaluate(model, noise_fn, loss_fn, test_ds, output_transform=output_transform,expname=expname)
+    ks, area_dist = evaluate(model, noise_fn, loss_fn, test_ds, output_transform=output_transform,expname=expname,device=device)
 
     return ks, area_dist
 
 from scipy.stats import ks_2samp
-def evaluate(model, noise_fn, lossfn, ds, output_transform=None,expname=''):
+def evaluate(model, noise_fn, lossfn, ds, output_transform=None, expname='', device="cpu"):
 
     real = ds.X
 
@@ -107,7 +107,7 @@ def evaluate(model, noise_fn, lossfn, ds, output_transform=None,expname=''):
     fakes = []
     for i in range(nbatches):
         # noise[batch_sz*i:batch_sz*(i+1)]
-        fake = model(noise[batch_sz * i:batch_sz * (i + 1)].cuda()).detach().cpu().numpy().reshape(-1)
+        fake = model(noise[batch_sz * i:batch_sz * (i + 1)].to(device)).detach().cpu().numpy().reshape(-1)
         # fake = model(noise[batch_sz*i:batch_sz*(i+1)]).detach().numpy().reshape(-1)
         if output_transform is not None:
             fake = output_transform(fake)
@@ -126,8 +126,8 @@ def evaluate(model, noise_fn, lossfn, ds, output_transform=None,expname=''):
 
     lss = 0
     for i in range(nbatches):
-        fake_batch = torch.Tensor(fake[batch_sz*i:batch_sz*(i+1)]).reshape(-1,1).cuda()
-        real_batch = torch.Tensor(real[batch_sz*i:batch_sz*(i+1)]).reshape(-1,1).cuda()
+        fake_batch = torch.Tensor(fake[batch_sz*i:batch_sz*(i+1)]).reshape(-1,1).to(device)
+        real_batch = torch.Tensor(real[batch_sz*i:batch_sz*(i+1)]).reshape(-1,1).to(device)
 
         lss += lossfn(fake_batch, real_batch)/nbatches
 
@@ -229,4 +229,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    exp(args.ds, alg=args.type)
+    if torch.cuda.is_available():
+        device = 'cuda'
+    elif torch.backends.mps.is_available():
+        device = 'mps'
+    else:
+        device = 'cpu'
+
+    exp(args.ds, alg=args.type, device=device)

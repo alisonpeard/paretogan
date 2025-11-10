@@ -20,6 +20,8 @@ def train(model, noise_fn, loss_fn, train_ds, test_ds, iters=10000, lr=1e-4, bat
 
     if torch.cuda.is_available():
         device = 'cuda'
+    elif torch.backends.mps.is_available():
+        device = 'mps'
     else:
         device = 'cpu'
     model = model.to(device)
