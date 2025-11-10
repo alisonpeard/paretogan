@@ -21,7 +21,7 @@ def exp(dsind, alg='pareto', device="cpu"):
     in_size = 2
 
     h_size = 32
-    iters = 1 # 20_000
+    iters = 20_000
 
     assert dsind<len(test_datasets), "dataset index must be less than " + str(len(test_datasets))
     ds = test_datasets[dsind]()
