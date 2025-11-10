@@ -81,7 +81,7 @@ def run_exp(dataset, model, noise_fn, loss_fn, lr=1e-4, iters=10000, output_tran
     val_ds = dataset[1]
     test_ds = dataset[2]
 
-    utils.train(model, noise_fn, loss_fn, train_ds, val_ds, iters=iters, lr=lr)
+    utils.train(model, noise_fn, loss_fn, train_ds, val_ds, iters=iters, lr=lr, device=device)
 
     # vdist = evaluate(model, noise_fn, loss_fn, val_ds, output_transform=output_transform,expname=expname)
     ks, area_dist = evaluate(model, noise_fn, loss_fn, test_ds, output_transform=output_transform,expname=expname,device=device)
