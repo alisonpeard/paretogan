@@ -70,6 +70,20 @@ def exp(dsind, alg='pareto', device="cpu"):
         loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
         ks, area_dist = run_exp(ln_ds, model, noise_fn, loss_fn, iters=iters, lr=lr,
                        output_transform=utils.loguntransform, device=device)
+    
+    elif alg == 'cauchy2gaussian':
+        from functools import partial
+        new_ds, loc, scale = datasets.DS(utils.cauchy2gaussian(ds[0].X))
+        ln_ds = [new_ds] + list(ds[1:])
+
+        model = models.Generator(in_size, h_size, 1)
+        noise_fn = lambda bsz: torch.randn(bsz, in_size)
+
+        gamma = 1
+        loss_fn = lambda X, Y: mmd.ed_kernel_poly(X, Y, gamma=gamma)
+        ks, area_dist = run_exp(ln_ds, model, noise_fn, loss_fn, iters=iters, lr=lr,
+                       output_transform=partial(utils.gaussian2cauchy, loc=loc, scale=scale))
+    
     else:
         raise ValueError("alg must be one of 'pareto','uniform','normal','lognormal'")
 

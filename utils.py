@@ -2,6 +2,7 @@
 import numpy as np
 import torch
 import torch.optim as optim
+import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 
@@ -14,6 +15,29 @@ def loguntransform(x):
     y = np.sign(x)*(np.exp(np.abs(x))-1)
     return y
 
+
+def cauchy2gaussian(x):
+    using_tensors = type(x).__name__ == "Tensor"
+
+    loc, scale = stats.cauchy.fit(x.numpy().reshape(-1))
+    u = stats.cauchy.cdf(x.numpy().reshape(-1), loc=loc, scale=scale)
+    y = stats.norm.ppf(u).reshape(-1,1)
+
+    if using_tensors:
+        y = torch.Tensor(y)
+
+    return y, loc, scale
+
+
+def gaussian2cauchy(x, loc, scale):
+    using_tensors = type(x).__name__ == "Tensor"
+    if using_tensors:
+        x = x.numpy()
+    u = stats.norm.cdf(x)
+    y = stats.cauchy.ppf(u, loc=loc, scale=scale)
+    if using_tensors:
+        y = torch.Tensor(y)
+    return y
 
 
 def train(model, noise_fn, loss_fn, train_ds, test_ds, iters=10000, lr=1e-4, batch_size=256, device="cpu"):

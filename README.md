@@ -10,6 +10,7 @@ Note: we recommend installing torch with GPU support
 ```
 python exps.py -ds 0 -type pareto
 python exps.py -ds 0 -type normal
+python exps.py -ds 0 -type cauchy2gaussian
 ```
 
 ## Options
@@ -20,9 +21,6 @@ GAN type (-type):
  * lognormal
 
 Dataset (-ds): 
- * 0: Keystrokes
- * 1: Wiki Traffic
- * 2: Live Journal
- * 3: Dual Cauchy
+ * 0: Dual Cauchy
 
 Note: real datasets may not be available anymore. Dual Cauchy is a good "dataset" to illustrate the concept. 
