@@ -12,7 +12,7 @@ This repo investigates whether a simpler approach can achieve similar results. S
 
 Result metrics are shown in the table below. The KS statistic measures the maximum distance between the empirical cumulative distribution functions of the generated and real data. Lower is better. The area function computes the area between the log-log complementary cumulative distribution functions (CCDFs). This metric is particularly sensitive to tail behavior in heavy-tailed distributions. Lower is better.
 
-| Experiment     | KS Statistic | Log-Log Area |
+| Experiment     | KS Statistic (↓) | Log-Log Area (↓) |
 |----------------|--------------|---------------|
 | `normal`         | 0.0332       | 52.35         |
 | `pareto`         | 0.0123       | 1.97          |
